@@ -175,7 +175,7 @@ def main():
     me_id = int(me_id_str)
     print(f"[bot] Using USER_ID={me_id}")
 
-    first_loop = True
+    first_loop = False
     while True:
         try:
             print("[bot] tick")
