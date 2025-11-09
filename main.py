@@ -80,6 +80,7 @@ def get_client():
 )
 
 
+
 def build_user_map(includes):
     if not includes or "users" not in includes:
         return {}
@@ -231,6 +232,7 @@ def main():
             print("[bot] loop error:", e)
             import traceback; traceback.print_exc()
             time.sleep(30)
+
 
 if __name__ == "__main__":
     main()
