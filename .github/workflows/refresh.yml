@@ -2,22 +2,19 @@ name: Auto Refresh Render Bot
 
 on:
   schedule:
-    - cron: "0 */12 * * *"  # every 12 hours
-  workflow_dispatch:        # manual trigger (optional)
+    - cron: "0 */12 * * *"   # every 12 hours
+  workflow_dispatch:          # manual trigger
 
 jobs:
-  refresh:
+  ping-render:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Configure Git
+      - name: Trigger Render redeploy via deploy hook
+        env:
+          RENDER_HOOK_URL: ${{ secrets.RENDER_HOOK_URL }}
         run: |
-          git config --global user.name "Auto Refresh Bot"
-          git config --global user.email "auto-refresh@github.com"
-
-      - name: Create and push empty commit
-        run: |
-          git commit --allow-empty -m "auto refresh $(date)"
-          git push
+          if [ -z "$RENDER_HOOK_URL" ]; then
+            echo "Missing RENDER_HOOK_URL secret"; exit 1
+          fi
+          curl -fsS -X POST "$RENDER_HOOK_URL"
+          echo "Deploy hook triggered."
