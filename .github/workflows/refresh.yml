@@ -1,0 +1,23 @@
+name: Auto Refresh Render Bot
+
+on:
+  schedule:
+    - cron: "0 */12 * * *"  # every 12 hours
+  workflow_dispatch:        # manual trigger (optional)
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "Auto Refresh Bot"
+          git config --global user.email "auto-refresh@github.com"
+
+      - name: Create and push empty commit
+        run: |
+          git commit --allow-empty -m "auto refresh $(date)"
+          git push
