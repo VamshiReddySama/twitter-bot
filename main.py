@@ -31,12 +31,16 @@ def load_state():
 def save_state(state):
     Path(STATE_FILE).write_text(json.dumps(state))
 
-
 def get_client():
-    env_path = Path(__file__).with_name(".env")
-    if not env_path.exists():
-        raise RuntimeError(f".env not found at {env_path}")
-    load_dotenv(dotenv_path=env_path)
+    # Try loading .env if present (local dev). On Render, env vars already exist.
+    try:
+        from pathlib import Path
+        env_path = Path(__file__).with_name(".env")
+        if env_path.exists():
+            from dotenv import load_dotenv
+            load_dotenv(dotenv_path=env_path)
+    except Exception:
+        pass  # safe to ignore
 
     api_key = os.getenv("API_KEY")
     api_key_secret = os.getenv("API_KEY_SECRET")
@@ -52,7 +56,18 @@ def get_client():
         "BEARER_TOKEN": bearer
     }.items() if not v]
     if missing:
-        raise RuntimeError("Missing in .env -> " + ", ".join(missing))
+        raise RuntimeError("Missing env vars -> " + ", ".join(missing))
+
+    print("[bot] get_client(): credentials loaded")
+    return tweepy.Client(
+        consumer_key=api_key,
+        consumer_secret=api_key_secret,
+        access_token=access_token,
+        access_token_secret=access_token_secret,
+        bearer_token=bearer,
+        wait_on_rate_limit=False
+    )
+
 
     return tweepy.Client(
         consumer_key=api_key,
@@ -174,16 +189,18 @@ def handle_mentions(client, first_run=False):
     save_state(state)
 
 
-def main():
+ddef main():
     client = get_client()
     me = client.get_me().data
-    print(f"Running as @{me.username} (id={me.id})")
+    print(f"[bot] Running as @{me.username} (id={me.id})")
 
     first_loop = True
     while True:
+        print("[bot] tick")
         handle_mentions(client, first_run=first_loop)
         first_loop = False
         time.sleep(POLL_SECONDS)
+
 
 
 if __name__ == "__main__":
