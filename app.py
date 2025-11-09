@@ -17,7 +17,7 @@ def run_bot():
             print("[app] restarting bot in 30 seconds…")
             time.sleep(30)
 
-# start background bot thread
+# start background bot thread at import time
 Thread(target=run_bot, daemon=True).start()
 
 @app.get("/")
