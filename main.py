@@ -189,17 +189,33 @@ def handle_mentions(client, first_run=False):
     save_state(state)
 
 def main():
-    client = get_client()
-    me = client.get_me().data
-    print(f"[bot] Running as @{me.username} (id={me.id})")
+    try:
+        client = get_client()
+        print("[bot] calling get_me()…")
+        me_resp = client.get_me()
+        if not me_resp or not me_resp.data:
+            print("[bot] ERROR: get_me() returned no data")
+            time.sleep(30)
+            return
+        me = me_resp.data
+        print(f"[bot] Running as @{me.username} (id={me.id})")
+    except Exception as e:
+        print("[bot] startup error:", e)
+        import traceback; traceback.print_exc()
+        time.sleep(30)
+        return
 
     first_loop = True
     while True:
-        print("[bot] tick")
-        handle_mentions(client, first_run=first_loop)
-        first_loop = False
-        time.sleep(POLL_SECONDS)
-
+        try:
+            print("[bot] tick")
+            handle_mentions(client, first_run=first_loop)
+            first_loop = False
+            time.sleep(POLL_SECONDS)
+        except Exception as e:
+            print("[bot] loop error:", e)
+            import traceback; traceback.print_exc()
+            time.sleep(30)
 if __name__ == "__main__":
     main()
 
