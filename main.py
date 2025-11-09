@@ -189,7 +189,7 @@ def handle_mentions(client, first_run=False):
     save_state(state)
 
 
-ddef main():
+def main():
     client = get_client()
     me = client.get_me().data
     print(f"[bot] Running as @{me.username} (id={me.id})")
@@ -200,8 +200,6 @@ ddef main():
         handle_mentions(client, first_run=first_loop)
         first_loop = False
         time.sleep(POLL_SECONDS)
-
-
 
 if __name__ == "__main__":
     main()
