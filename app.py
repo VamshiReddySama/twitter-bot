@@ -1,16 +1,23 @@
-# app.py — tiny web + background bot for Render
-
 from threading import Thread
 from flask import Flask
-import main  # your bot file (main.py)
+import traceback
+import time
+import main  # your bot module
 
 app = Flask(__name__)
 
 def run_bot():
-    # call the main loop from main.py
-    main.main()
+    while True:
+        try:
+            print("[app] starting bot thread…")
+            main.main()
+        except Exception as e:
+            print("[app] bot crashed:", e)
+            traceback.print_exc()
+            print("[app] restarting bot in 30 seconds…")
+            time.sleep(30)
 
-# start bot in a background thread
+# start background bot thread
 Thread(target=run_bot, daemon=True).start()
 
 @app.get("/")
@@ -18,7 +25,7 @@ def health():
     return "bot alive ✅"
 
 if __name__ == "__main__":
-    # Render will set PORT; locally we default to 10000
     import os
     port = int(os.getenv("PORT", "10000"))
+    print(f"[app] running Flask server on port {port}")
     app.run(host="0.0.0.0", port=port)

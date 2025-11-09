@@ -188,7 +188,6 @@ def handle_mentions(client, first_run=False):
     state["last_mention_id"] = newest_id
     save_state(state)
 
-
 def main():
     client = get_client()
     me = client.get_me().data
