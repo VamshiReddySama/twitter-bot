@@ -57,14 +57,13 @@ def get_client():
 
     print("[bot] get_client(): credentials loaded")
     return tweepy.Client(
-        consumer_key=api_key,
-        consumer_secret=api_key_secret,
-        access_token=access_token,
-        access_token_secret=access_token_secret,
-        bearer_token=bearer,
-        wait_on_rate_limit=False,
-        timeout=20
-    )
+    consumer_key=api_key,
+    consumer_secret=api_key_secret,
+    access_token=access_token,
+    access_token_secret=access_token_secret,
+    bearer_token=bearer,
+    wait_on_rate_limit=False
+)
 
 def build_user_map(includes):
     if not includes or "users" not in includes:
