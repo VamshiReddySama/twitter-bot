@@ -70,13 +70,14 @@ def get_client():
 
 
     return tweepy.Client(
-        consumer_key=api_key,
-        consumer_secret=api_key_secret,
-        access_token=access_token,
-        access_token_secret=access_token_secret,
-        bearer_token=bearer,
-        wait_on_rate_limit=False  # we'll handle rate limits ourselves
-    )
+    consumer_key=api_key,
+    consumer_secret=api_key_secret,
+    access_token=access_token,
+    access_token_secret=access_token_secret,
+    bearer_token=bearer,
+    wait_on_rate_limit=False,
+    timeout=20  # <-- add this
+)
 
 
 def build_user_map(includes):
@@ -192,11 +193,22 @@ def main():
     try:
         client = get_client()
         print("[bot] calling get_me()…")
-        me_resp = client.get_me()
+        try:
+            me_resp = client.get_me()
+        except tweepy.errors.TooManyRequests as e:
+            print("[bot] TooManyRequests on get_me() — backing off")
+            time.sleep(60)
+            return
+        except tweepy.TweepyException as e:
+            print("[bot] TweepyException on get_me():", e)
+            time.sleep(30)
+            return
+
         if not me_resp or not me_resp.data:
             print("[bot] ERROR: get_me() returned no data")
             time.sleep(30)
             return
+
         me = me_resp.data
         print(f"[bot] Running as @{me.username} (id={me.id})")
     except Exception as e:
@@ -212,10 +224,14 @@ def main():
             handle_mentions(client, first_run=first_loop)
             first_loop = False
             time.sleep(POLL_SECONDS)
+        except tweepy.errors.TooManyRequests as e:
+            print("[bot] rate limited — sleeping 60s")
+            time.sleep(60)
         except Exception as e:
             print("[bot] loop error:", e)
             import traceback; traceback.print_exc()
             time.sleep(30)
+
 if __name__ == "__main__":
     main()
 
